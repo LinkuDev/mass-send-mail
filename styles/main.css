@@ -10,6 +10,7 @@ body {
 
 .list-email {
   width: 100%;
+  margin: 20px 0;
 }
 
 .log-history {
@@ -33,6 +34,3 @@ body {
   /* Thêm kiểu dáng cho spinner hoặc loading icon của bạn */
 }
 
-#log-content {
-    edit
-}

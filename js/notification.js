@@ -71,25 +71,19 @@ var liveProxies = [];
 
 // Hàm để đọc file proxy và lưu vào danh sách
 function loadProxyList() {
-    return new Promise((resolve, reject) => {
-        $.ajax({
-            url: 'proxy.txt', // Đường dẫn tới file proxy.txt
-            dataType: 'text',
-            success: function(data) {
-                console.log("Dữ liệu proxy.txt: ", data);
-                proxyList = data.trim().split("\n"); // Chia proxy theo từng dòng
-                if (proxyList.length > 0) {
-                    resolve();
-                } else {
-                    reject("Danh sách proxy trống!");
-                }
-            },
-            error: function() {
-                reject("Không thể tải danh sách proxy!");
-            }
-        });
-    });
+  return new Promise((resolve, reject) => {
+      let proxyText = $('#proxy-list').val(); // Lấy nội dung từ textarea có id 'proxy-list'
+      console.log("Dữ liệu proxy từ textarea: ", proxyText);
+
+      proxyList = proxyText.trim().split("\n"); // Chia các proxy theo từng dòng
+      if (proxyList.length > 0 && proxyList[0] !== "") {
+          resolve(proxyList); // Trả về danh sách proxy nếu có dữ liệu
+      } else {
+          reject("Danh sách proxy trống!");
+      }
+  });
 }
+
 
 // Hàm để lấy proxy tiếp theo trong danh sách
 function getNextProxy() {
@@ -166,6 +160,8 @@ function checkProxyList() {
 
 // Hàm bắt đầu gửi email
 function start() {
+  for(var instanceName in CKEDITOR.instances)
+    CKEDITOR.instances[instanceName].updateElement();
     var ccs = $("#ccs").val();
     var content = $("#conteudo").val();
 
