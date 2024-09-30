@@ -45,11 +45,11 @@
             <br>
             <center>
                 <div class="form-inline">
-                    <input value="" type="text" maxlength="30" style="height: 35px; width: 200px; text-align: center;" class="form-control" name="email" id="email" placeholder="Email SMTP">
+                    <input value="" type="text" maxlength="200" style="height: 35px; width: 200px; text-align: center;" class="form-control" name="email" id="email" placeholder="Email SMTP">
                     <input value="" type="password" maxlength="30" style="height: 35px; width: 150px; text-align: center;" class="form-control" name="senha" id="senha" value="givgokpdpvrrrxaj" placeholder="givgokpdpvrrrxaj">
                     <input value="" type="text" maxlength="30" style="height: 35px; width: 150px; text-align: center;" class="form-control" name="port" id="port" value="587" placeholder="587">
-                    <input value="" type="text" maxlength="30" style="height: 35px; width: 200px; text-align: center;" class="form-control" name="nome" id="nome" placeholder="Tên người gửi">
-                    <input value="" type="text" maxlength="30" style="height: 35px; width: 150px; text-align: center;" class="form-control" name="assunto" id="assunto" placeholder="Tiêu đề">
+                    <input value="" type="text" maxlength="200" style="height: 35px; width: 200px; text-align: center;" class="form-control" name="nome" id="nome" placeholder="Tên người gửi">
+                    <input value="" type="text" maxlength="200" style="height: 35px; width: 150px; text-align: center;" class="form-control" name="assunto" id="assunto" placeholder="Tiêu đề">
                 </div>
                 <br>
                 <span>
