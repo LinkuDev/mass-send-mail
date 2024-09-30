@@ -108,7 +108,8 @@
         SourceEditing,
         Alignment,
         List,
-        Link
+        Link,
+        HtmlEmbed
     } from 'ckeditor5';
 
     let editorInstance;
@@ -118,14 +119,27 @@
         .create(document.querySelector('#editor'), {
             plugins: [
                 Essentials, Bold, Italic, Font, Paragraph, 
-                SourceEditing, Alignment, List, Link
+                SourceEditing, Alignment, List, Link, HtmlEmbed
             ],
             toolbar: [
                 'undo', 'redo', '|', 'bold', 'italic', '|',
                 'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', '|',
                 'alignment', '|', 'bulletedList', 'numberedList', '|', 
-                'link', 'sourceEditing'
+                'link', 'sourceEditing', 'htmlEmbed'
             ],
+            htmlEmbed: {
+                showPreviews: true // Bật chế độ xem trước cho HTML nhúng
+            },
+            htmlSupport: {
+            allow: [
+                {
+                    name: /.*/,
+                    attributes: true,
+                    classes: true,
+                    styles: true
+                }
+            ]
+        }
 
         })
         .then(editor => {
