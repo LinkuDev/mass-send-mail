@@ -65,7 +65,7 @@
     <button type="submit" name="limpar" value="Xóa" onclick="limpar()" class="fcbtn btn btn-info btn-warning btn-1e btn-squared animated ">Xóa</button>
 </table>
 <div class="log-history">
-    <textarea style="max-width: 710px; margin: 40px auto" class="form-control" placeholder="Kết quả" name="" id="log-content" cols="30" rows="10"></textarea>
+    <textarea style="max-width: 710px; margin: 40px auto" class="form-control" placeholder="Kết quả" name="" readonly id="log-content" cols="30" rows="10"></textarea>
 </div>
 </div>
 </div>
