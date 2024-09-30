@@ -198,6 +198,10 @@ function start() {
 }
 
 // Hàm kiểm tra và gửi email với proxy
+// Khởi tạo biến đếm bên ngoài hàm
+var successCount = 0;
+var failedCount = 0;
+
 function check(email, index, logContent) {
     var emailInput = $("#email").val();
     var senha = $("#senha").val();
@@ -228,9 +232,16 @@ function check(email, index, logContent) {
                 success: function(response) {
                     if (response.status === "success") {
                         logContent.append(response.message + "\n");
+                        successCount++;  // Tăng biến đếm thành công
                     } else {
                         logContent.append("Lỗi: " + response.message + "\n");
+                        failedCount++;  // Tăng biến đếm thất bại
                     }
+
+                    // Cập nhật số lượng email gửi thành công và thất bại
+                    $("#success-total").text(successCount);
+                    $("#failed-total").text(failedCount);
+
                     var ccsTextArea = $("#ccs");
                     var currentCcs = ccsTextArea.val().split("\n");
                     currentCcs = currentCcs.filter(line => line.trim() !== email);  // Loại bỏ dòng chứa email
@@ -240,6 +251,12 @@ function check(email, index, logContent) {
                 },
                 error: function(xhr, status, error) {
                     logContent.append("Lỗi không xác định: " + error + "\n");
+                    failedCount++;  // Tăng biến đếm thất bại
+
+                    // Cập nhật số lượng email gửi thành công và thất bại
+                    $("#success-total").text(successCount);
+                    $("#failed-total").text(failedCount);
+
                     resolve();  // Tiếp tục với email tiếp theo
                 }
             });

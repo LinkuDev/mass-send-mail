@@ -69,6 +69,10 @@
     <button type="submit" name="send" value="Bắt đầu" onclick="start()" class="fcbtn btn btn-warning btn-outline btn-1e btn-squared">Bắt đầu</button>
     <button type="submit" name="limpar" value="Xóa" onclick="limpar()" class="fcbtn btn btn-info btn-warning btn-1e btn-squared animated ">Xóa</button>
     </table>
+    <div class="result center">
+        <span>Đã gửi thành công: <b style="color: green;" id="success-total">0</b></span>
+        <span>Thất bại: <b style="color: red;" id="failed-total">0</b></span>
+    </div>
     <div class="log-history">
         <textarea style="max-width: 710px; margin: 40px auto" class="form-control" placeholder="Kết quả" name="" readonly id="log-content" cols="30" rows="10"></textarea>
     </div>
