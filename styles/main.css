@@ -1,0 +1,34 @@
+textarea {
+  resize: none;
+  width: 100%;
+}
+
+body {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.list-email {
+  width: 100%;
+}
+
+.log-history {
+  margin: 20px 0;
+}
+#loading,
+#loading-check-proxy {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Màu nền tối với độ trong suốt */
+  z-index: 9999; /* Đảm bảo nó nằm trên các thành phần khác */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner {
+  /* Thêm kiểu dáng cho spinner hoặc loading icon của bạn */
+}

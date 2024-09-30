@@ -1,6 +1,6 @@
 function notifyMe(_0x6463x2, _0x6463x3, _0x6463x4) {
   if (!("Notification" in window)) {
-    alert("This browser does not support desktop notification");
+    alert("Trình duyệt này không hỗ trợ thông báo trên màn hình");
   } else {
     if (Notification.permission === "granted") {
       var _0x6463x5 = {
@@ -41,21 +41,21 @@ function limpar() {
   var _0x6463xb = $("#ccs").val();
   if (_0x6463xb.length == 0) {
     document.getElementById("demo").innerHTML =
-      '<div class="label label-warning label-dismissible">Carregue a lista antes de limpa-la!</div>';
+      '<div class="label label-warning label-dismissible">Hãy tải danh sách trước khi xóa!</div>';
     notifyMe(
-      "Nós não consiguimos limpar algo que já está limpo!",
-      "Erro a limpar a lista."
+      "Chúng tôi không thể xóa thứ gì đó đã được xóa!",
+      "Lỗi khi xóa danh sách."
     );
     audio2.play();
     return;
   } else {
     document.getElementById("ccs").value = "";
     document.getElementById("demo").innerHTML =
-      '<div class="label label-warning label-dismissible">Lista limpa.</div>';
+      '<div class="label label-warning label-dismissible">Danh sách đã được xóa.</div>';
     audio.play();
     notifyMe(
-      "Todas os e-mails que estavam na sua lista foram limpos!",
-      "Lista limpa."
+      "Tất cả email trong danh sách của bạn đã được xóa!",
+      "Danh sách đã được xóa."
     );
   }
 }
@@ -65,90 +65,192 @@ function rmLinha(_0x6463xd) {
   _0x6463xe.splice(0, 1);
   $(_0x6463xd).val(_0x6463xe.join("\n"));
 }
+var proxyList = [];
+var currentProxyIndex = 0;
+var liveProxies = [];
 
-function start() {
-  var _0x6463xb = $("#ccs").val();
-  if (_0x6463xb.length == 0) {
-    document.getElementById("demo").innerHTML =
-      '<div class="label label-warning label-dismissible">Carregue a lista!</div>';
-    notifyMe(
-      "Você precisa carregar uma lista antes de iniciar!",
-      "Erro ao iniciar."
-    );
-    audio2.play();
-    return;
-  } else {
-    document.getElementById("demo").innerHTML =
-      '<div class="label label-warning label-dismissible">Iniciado.</div>';
-    audio.play();
-    notifyMe(
-      "Seus e-mails foram enviados com sucesso, estamos iniciando!",
-      "Iniciando."
-    );
-  }
-  var _0x6463x10;
-  var _0x6463xb = $("#ccs").val();
-  var _0x6463x11 = _0x6463xb.split("\n");
-  for (_0x6463x10 = 0; _0x6463x10 < _0x6463x11.length; _0x6463x10++) {
-    var _0x6463x13 = _0x6463x11[_0x6463x10];
-    var _0x6463xd = _0x6463x10;
-    check(_0x6463x13, _0x6463xd);
-  }
-
-  function _0x6463x14() {
-    document.getElementById("demo").innerHTML =
-      '<div class="label label-warning label-dismissible">Carregue a lista!</div>';
-    notifyMe(
-      "Você precisa carregar uma lista antes de iniciar!",
-      "Erro ao iniciar."
-    );
-    audio2.play();
-  }
-  var _0x6463x15 = document.getElementById("ccs").value;
-  var _0x6463x16 = _0x6463x15.split("\n");
-  var _0x6463x17 = count(_0x6463x16, "COUNT_RECURSIVE");
-  var _0x6463x18 = _0x6463x15;
-  var _0x6463x19 = listToArray(_0x6463x18, "\n");
-  document.getElementById("carregada").innerHTML = _0x6463x17;
-  for (var _0x6463x10 = 0; _0x6463x10 < _0x6463x17; _0x6463x10++) {
-    var _0x6463x1a = _0x6463x19[_0x6463x10];
-    var _0x6463x1b = _0x6463x1a.split("|");
-    var _0x6463x1c = "csid_" + _0x6463x10;
-    var _0x6463x1d = "ccid_" + _0x6463x10;
-    var _0x6463x1e = document.getElementById("ccs").value;
-    var _0x6463x1f = _0x6463xb.split("\n");
-    for (var _0x6463x10 = _0x6463x1f.length; _0x6463x10 < 0; _0x6463x10++) {
-      var _0x6463x20 = _0x6463x1f[_0x6463x10].split("|");
-    }
-    _0x6463x1e = _0x6463x1e.replace(_0x6463x1a, "");
-    _0x6463x1e = _0x6463x1e.replace("\n", "");
-    document.getElementById("ccs").innerHTML = _0x6463x1e;
-  }
-}
-
-function check(_0x6463x13, _0x6463xd) {
-  var email = $("#email").val();
-  var senha = $("#senha").val();
-  var nome = $("#nome").val();
-  var assunto = $("#assunto").val();
-  var conteudo = $("#conteudo").val();
-  setTimeout(function () {
-    $.ajax({
-      type: "GET",
-      url: "app/api.php",
-      dataType: "html",
-      data: {
-        send: "cc",
-        ccs: _0x6463x13,
-        email: email,
-        senha: senha,
-        nome: nome,
-        assunto: assunto,
-        conteudo: conteudo,
-      },
+// Hàm để đọc file proxy và lưu vào danh sách
+function loadProxyList() {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: 'proxy.txt', // Đường dẫn tới file proxy.txt
+            dataType: 'text',
+            success: function(data) {
+                console.log("Dữ liệu proxy.txt: ", data);
+                proxyList = data.trim().split("\n"); // Chia proxy theo từng dòng
+                if (proxyList.length > 0) {
+                    resolve();
+                } else {
+                    reject("Danh sách proxy trống!");
+                }
+            },
+            error: function() {
+                reject("Không thể tải danh sách proxy!");
+            }
+        });
     });
-  }, _0x6463xd * 2000);
 }
+
+// Hàm để lấy proxy tiếp theo trong danh sách
+function getNextProxy() {
+    if (liveProxies.length === 0) {
+        console.error("Danh sách proxy sống rỗng!");
+        return null;
+    }
+    var proxy = liveProxies[currentProxyIndex];
+    currentProxyIndex = (currentProxyIndex + 1) % liveProxies.length;
+    console.log("Sử dụng proxy: ", proxy);
+    return proxy;
+}
+
+// Hàm để kiểm tra proxy có hoạt động không
+function checkProxy(proxy) {
+  console.log("Đang kiểm tra proxy: ", proxy);  // Log proxy đang kiểm tra
+  return new Promise((resolve, reject) => {
+      $.ajax({
+          url: "app/check_proxy.php",
+          method: "POST",
+          data: { proxy: proxy },
+          success: function(response) {
+              console.log("Kết quả kiểm tra: ", response);  // Log phản hồi từ server
+              
+              // Nếu phản hồi là chuỗi, phân tích cú pháp thành đối tượng JSON
+              let parsedResponse;
+              try {
+                  parsedResponse = typeof response === 'string' ? JSON.parse(response) : response;
+              } catch (e) {
+                  console.error("Lỗi phân tích cú pháp phản hồi: ", e);
+                  resolve(false); // Nếu phân tích cú pháp thất bại, xem như proxy không hoạt động
+                  return;
+              }
+              
+              if (parsedResponse.status == "live") {
+                  resolve(true);  // Proxy hoạt động
+              } else {
+                  console.log("Proxy không hoạt động: ", parsedResponse.message);  // Log lý do không hoạt động
+                  resolve(false); // Proxy không hoạt động
+              }
+          },
+          error: function(xhr, status, error) {
+              console.error("Lỗi khi kiểm tra proxy: ", error);  // Log lỗi nếu có
+              resolve(false);  // Lỗi kết nối, xem như proxy không hoạt động
+          }
+      });
+  });
+}
+
+
+
+
+// Hàm để kiểm tra danh sách proxy trước khi gửi email
+function checkProxyList() {
+  var checkPromises = proxyList.map(proxy =>  checkProxy(proxy));
+  console.log("Kết quả từ kiểm tra proxy sau khi ajax: ",  checkPromises)
+  $("#loading-check-proxy").show();
+
+  return Promise.all(checkPromises).then(results => {
+      console.log("Kết quả từ kiểm tra proxy: ", results);
+      // Lọc proxy sống
+      liveProxies = proxyList.filter((proxy, index) => results[index]);
+      console.log("Danh sách proxy hoạt động sau khi lọc: ", liveProxies);
+
+      $("#loading-check-proxy").hide();
+      if (liveProxies.length === 0) {
+          alert("Không có proxy nào hoạt động!");
+          return Promise.reject("Không có proxy hoạt động");
+      }
+      return liveProxies;
+  });
+}
+
+
+// Hàm bắt đầu gửi email
+function start() {
+    var ccs = $("#ccs").val();
+    var content = $("#conteudo").val();
+
+    if (ccs.length === 0) {
+        alert("Bạn cần phải tải một danh sách trước khi bắt đầu!");
+        return;
+    } else if (content === '') {
+        alert("Thêm nội dung!");
+        return;
+    } else {
+        console.log("Bắt đầu gửi email...");
+        $("#loading").show();
+    }
+
+    loadProxyList().then(() => {
+        return checkProxyList();
+    }).then(() => {
+        var emails = ccs.split("\n");
+        var logContent = $("#log-content");
+
+        // Gửi email qua các proxy sống
+        emails.reduce((promise, email, index) => {
+            return promise.then(() => {
+                return check(email, index, logContent);
+            });
+        }, Promise.resolve()).finally(() => {
+            $("#loading").hide();
+            alert("Quá trình gửi email đã hoàn tất!");
+        });
+    }).catch((error) => {
+        console.error("Lỗi khi xử lý proxy: ", error);
+        $("#loading").hide();
+    });
+}
+
+// Hàm kiểm tra và gửi email với proxy
+function check(email, index, logContent) {
+    var emailInput = $("#email").val();
+    var senha = $("#senha").val();
+    var nome = $("#nome").val();
+    var port = $("#port").val();
+    var assunto = $("#assunto").val();
+    var conteudo = $("#conteudo").val();
+
+    var proxy = getNextProxy();
+
+    return new Promise((resolve, reject) => {
+        setTimeout(function() {
+            $.ajax({
+                type: "GET",
+                url: "app/api.php",
+                dataType: "json",
+                data: {
+                    send: "cc",
+                    ccs: email,
+                    email: emailInput,
+                    port: port,
+                    senha: senha,
+                    nome: nome,
+                    assunto: assunto,
+                    conteudo: conteudo,
+                    proxy: proxy
+                },
+                success: function(response) {
+                    if (response.status === "success") {
+                        logContent.append(response.message + "\n");
+                    } else {
+                        logContent.append("Lỗi: " + response.message + "\n");
+                    }
+                    var ccsTextArea = $("#ccs");
+                    var currentCcs = ccsTextArea.val().split("\n");
+                    currentCcs = currentCcs.filter(line => line.trim() !== email);  // Loại bỏ dòng chứa email
+                    ccsTextArea.val(currentCcs.join("\n"));  // Cập nhật lại nội dung textarea ccs
+
+                    resolve();  // Tiếp tục với email tiếp theo
+                },
+                error: function(xhr, status, error) {
+                    logContent.append("Lỗi không xác định: " + error + "\n");
+                    resolve();  // Tiếp tục với email tiếp theo
+                }
+            });
+        }, index * 2000);  // Giãn cách giữa các yêu cầu
+    });
+}
+
 
 function SelectAll(_0x6463xd) {
   document.getElementById(_0x6463xd).focus();
