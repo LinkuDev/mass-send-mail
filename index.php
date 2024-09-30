@@ -71,7 +71,7 @@
 </div>
 <!-- Copyright -->
 <div id="down" class="footer-copyright text-center py-3">© 2024 Bản quyền:
-    <b>LinhKu</b>
+    <b>NoName</b>
 </div>
 <div id="loading" style="display: none;">
     <div class="spinner">
