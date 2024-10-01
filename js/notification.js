@@ -285,7 +285,7 @@ function sendEmailsInParallel(emails, logContent, maxParallel) {
               activePromises--;
               next(); // Tiếp tục gửi email tiếp theo dù có lỗi
             });
-        }, 600); // Thêm độ trễ 100ms (hoặc bất kỳ giá trị nào bạn muốn)
+        }, 1000); // Thêm độ trễ 100ms (hoặc bất kỳ giá trị nào bạn muốn)
       }
     }
 
