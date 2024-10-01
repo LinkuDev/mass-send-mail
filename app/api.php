@@ -57,7 +57,7 @@ if ($_GET['send'] == "cc") {
                 $response['message'] = "Lỗi: Quota email đã vượt quá giới hạn gửi.";
             } elseif (strpos($errorMessage, 'SMTP connect() failed') !== false || strpos($errorMessage, 'Failed to authenticate') !== false) {
                 $response['status'] = "smtp_error";
-                $response['message'] = "Lỗi: Không thể kết nối hoặc xác thực với máy chủ SMTP. Kiểm tra lại cấu hình SMTP";
+                $response['message'] = $errorMessage;
             } elseif (strpos($errorMessage, 'Invalid address') !== false || strpos($errorMessage, 'SMTP Error: Data not accepted') !== false || strpos($errorMessage, 'Could not instantiate mail function') !== false) {
                 $response['status'] = "recipient_error";
                 $response['message'] = "Lỗi: Địa chỉ email hoặc dữ liệu không hợp lệ. Vui lòng kiểm tra lại email đích.";
