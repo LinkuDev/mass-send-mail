@@ -158,14 +158,25 @@ function checkProxyList() {
 function start() {
   for (var instanceName in CKEDITOR.instances)
     CKEDITOR.instances[instanceName].updateElement();
+  
   var ccs = $("#ccs").val();
   var content = $("#conteudo").val();
 
   if (ccs.length === 0) {
-    alert("Bạn cần phải tải một danh sách trước khi bắt đầu!");
+    Swal.fire({
+      icon: 'warning',
+      title: 'Cảnh báo!',
+      text: 'Bạn cần phải tải một danh sách trước khi bắt đầu!',
+      confirmButtonText: 'OK'
+    });
     return;
   } else if (content === "") {
-    alert("Thêm nội dung!");
+    Swal.fire({
+      icon: 'warning',
+      title: 'Cảnh báo!',
+      text: 'Thêm nội dung!',
+      confirmButtonText: 'OK'
+    });
     return;
   } else {
     console.log("Bắt đầu gửi email...");
@@ -187,22 +198,25 @@ function start() {
       $("#email-counter").text(`Đã gửi: 0/${emails.length}`);
 
       // Gửi email đa luồng với số luồng tối đa là 5 và cập nhật tiến độ
-      sendEmailsInParallel(emails, logContent, 5).finally(() => {
-        $("#loading").hide();
-        $("#progress-container").hide(); // Ẩn thanh progress bar khi hoàn tất
-        $("#progress-text").hide(); // Ẩn text phần trăm khi hoàn tất
-        $("#email-counter").hide(); // Ẩn số lượng email khi hoàn tất
-        alert("Quá trình gửi email đã hoàn tất!");
-      });
+      return sendEmailsInParallel(emails, logContent, 5);
+    })
+    .then(() => {
+      // Xử lý khi hoàn tất gửi email
+      alert("Quá trình gửi email đã hoàn tất!");
     })
     .catch((error) => {
-      console.error("Lỗi khi xử lý proxy: ", error);
+      console.error("Lỗi khi xử lý: ", error);
+      alert("Đã xảy ra lỗi: " + error.message); // Hiển thị thông báo lỗi cho người dùng
+    })
+    .finally(() => {
+      // Ẩn các phần hiển thị nếu có lỗi hoặc quá trình hoàn tất
       $("#loading").hide();
-      $("#progress-container").hide(); // Ẩn thanh progress bar nếu có lỗi
-      $("#progress-text").hide(); // Ẩn text phần trăm nếu có lỗi
-      $("#email-counter").hide(); // Ẩn số lượng email nếu có lỗi
+      $("#progress-container").hide(); // Ẩn thanh progress bar
+      $("#progress-text").hide(); // Ẩn text phần trăm
+      $("#email-counter").hide(); // Ẩn số lượng email
     });
 }
+
 
 function updateProgressBar(completedEmails, totalEmails) {
   var progressPercentage = Math.round((completedEmails / totalEmails) * 100);
