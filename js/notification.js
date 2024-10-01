@@ -72,91 +72,87 @@ var liveProxies = [];
 // Hàm để đọc file proxy và lưu vào danh sách
 function loadProxyList() {
   return new Promise((resolve, reject) => {
-      let proxyText = $('#proxy-list').val(); // Lấy nội dung từ textarea có id 'proxy-list'
-      console.log("Dữ liệu proxy từ textarea: ", proxyText);
+    let proxyText = $("#proxy-list").val(); // Lấy nội dung từ textarea có id 'proxy-list'
+    console.log("Dữ liệu proxy từ textarea: ", proxyText);
 
-      proxyList = proxyText.trim().split("\n"); // Chia các proxy theo từng dòng
-      if (proxyList.length > 0 && proxyList[0] !== "") {
-          resolve(proxyList); // Trả về danh sách proxy nếu có dữ liệu
-      } else {
-          reject("Danh sách proxy trống!");
-      }
+    proxyList = proxyText.trim().split("\n"); // Chia các proxy theo từng dòng
+    if (proxyList.length > 0 && proxyList[0] !== "") {
+      resolve(proxyList); // Trả về danh sách proxy nếu có dữ liệu
+    } else {
+      reject("Danh sách proxy trống!");
+    }
   });
 }
 
-
 // Hàm để lấy proxy tiếp theo trong danh sách
 function getNextProxy() {
-    if (liveProxies.length === 0) {
-        console.error("Danh sách proxy sống rỗng!");
-        return null;
-    }
-    var proxy = liveProxies[currentProxyIndex];
-    currentProxyIndex = (currentProxyIndex + 1) % liveProxies.length;
-    console.log("Sử dụng proxy: ", proxy);
-    return proxy;
+  if (liveProxies.length === 0) {
+    console.error("Danh sách proxy sống rỗng!");
+    return null;
+  }
+  var proxy = liveProxies[currentProxyIndex];
+  currentProxyIndex = (currentProxyIndex + 1) % liveProxies.length;
+  console.log("Sử dụng proxy: ", proxy);
+  return proxy;
 }
 
 // Hàm để kiểm tra proxy có hoạt động không
 function checkProxy(proxy) {
-  console.log("Đang kiểm tra proxy: ", proxy);  // Log proxy đang kiểm tra
+  console.log("Đang kiểm tra proxy: ", proxy); // Log proxy đang kiểm tra
   return new Promise((resolve, reject) => {
-      $.ajax({
-          url: "app/check_proxy.php",
-          method: "POST",
-          data: { proxy: proxy },
-          success: function(response) {
-              console.log("Kết quả kiểm tra: ", response);  // Log phản hồi từ server
-              
-              // Nếu phản hồi là chuỗi, phân tích cú pháp thành đối tượng JSON
-              let parsedResponse;
-              try {
-                  parsedResponse = typeof response === 'string' ? JSON.parse(response) : response;
-              } catch (e) {
-                  console.error("Lỗi phân tích cú pháp phản hồi: ", e);
-                  resolve(false); // Nếu phân tích cú pháp thất bại, xem như proxy không hoạt động
-                  return;
-              }
-              
-              if (parsedResponse.status == "live") {
-                  resolve(true);  // Proxy hoạt động
-              } else {
-                  console.log("Proxy không hoạt động: ", parsedResponse.message);  // Log lý do không hoạt động
-                  resolve(false); // Proxy không hoạt động
-              }
-          },
-          error: function(xhr, status, error) {
-              console.error("Lỗi khi kiểm tra proxy: ", error);  // Log lỗi nếu có
-              resolve(false);  // Lỗi kết nối, xem như proxy không hoạt động
-          }
-      });
+    $.ajax({
+      url: "app/check_proxy.php",
+      method: "POST",
+      data: { proxy: proxy },
+      success: function (response) {
+        console.log("Kết quả kiểm tra: ", response); // Log phản hồi từ server
+
+        // Nếu phản hồi là chuỗi, phân tích cú pháp thành đối tượng JSON
+        let parsedResponse;
+        try {
+          parsedResponse =
+            typeof response === "string" ? JSON.parse(response) : response;
+        } catch (e) {
+          console.error("Lỗi phân tích cú pháp phản hồi: ", e);
+          resolve(false); // Nếu phân tích cú pháp thất bại, xem như proxy không hoạt động
+          return;
+        }
+
+        if (parsedResponse.status == "live") {
+          resolve(true); // Proxy hoạt động
+        } else {
+          console.log("Proxy không hoạt động: ", parsedResponse.message); // Log lý do không hoạt động
+          resolve(false); // Proxy không hoạt động
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error("Lỗi khi kiểm tra proxy: ", error); // Log lỗi nếu có
+        resolve(false); // Lỗi kết nối, xem như proxy không hoạt động
+      },
+    });
   });
 }
-
-
-
 
 // Hàm để kiểm tra danh sách proxy trước khi gửi email
 function checkProxyList() {
-  var checkPromises = proxyList.map(proxy =>  checkProxy(proxy));
-  console.log("Kết quả từ kiểm tra proxy sau khi ajax: ",  checkPromises)
+  var checkPromises = proxyList.map((proxy) => checkProxy(proxy));
+  console.log("Kết quả từ kiểm tra proxy sau khi ajax: ", checkPromises);
   $("#loading-check-proxy").show();
 
-  return Promise.all(checkPromises).then(results => {
-      console.log("Kết quả từ kiểm tra proxy: ", results);
-      // Lọc proxy sống
-      liveProxies = proxyList.filter((proxy, index) => results[index]);
-      console.log("Danh sách proxy hoạt động sau khi lọc: ", liveProxies);
+  return Promise.all(checkPromises).then((results) => {
+    console.log("Kết quả từ kiểm tra proxy: ", results);
+    // Lọc proxy sống
+    liveProxies = proxyList.filter((proxy, index) => results[index]);
+    console.log("Danh sách proxy hoạt động sau khi lọc: ", liveProxies);
 
-      $("#loading-check-proxy").hide();
-      if (liveProxies.length === 0) {
-          alert("Không có proxy nào hoạt động!");
-          return Promise.reject("Không có proxy hoạt động");
-      }
-      return liveProxies;
+    $("#loading-check-proxy").hide();
+    if (liveProxies.length === 0) {
+      alert("Không có proxy nào hoạt động!");
+      return Promise.reject("Không có proxy hoạt động");
+    }
+    return liveProxies;
   });
 }
-
 
 // Hàm bắt đầu gửi email
 function start() {
@@ -166,54 +162,58 @@ function start() {
   var content = $("#conteudo").val();
 
   if (ccs.length === 0) {
-      alert("Bạn cần phải tải một danh sách trước khi bắt đầu!");
-      return;
-  } else if (content === '') {
-      alert("Thêm nội dung!");
-      return;
+    alert("Bạn cần phải tải một danh sách trước khi bắt đầu!");
+    return;
+  } else if (content === "") {
+    alert("Thêm nội dung!");
+    return;
   } else {
-      console.log("Bắt đầu gửi email...");
-      $("#loading").show();
-      $("#progress-container").show(); // Hiển thị thanh progress bar
-      $("#progress-text").show(); // Hiển thị text phần trăm
-      $("#email-counter").show(); // Hiển thị số lượng email đã gửi/ tổng số email
+    console.log("Bắt đầu gửi email...");
+    $("#loading").show();
+    $("#progress-container").show(); // Hiển thị thanh progress bar
+    $("#progress-text").show(); // Hiển thị text phần trăm
+    $("#email-counter").show(); // Hiển thị số lượng email đã gửi/ tổng số email
   }
 
-  loadProxyList().then(() => {
-    return checkProxyList();
-  }).then(() => {
+  loadProxyList()
+    .then(() => {
+      return checkProxyList();
+    })
+    .then(() => {
       var emails = ccs.split("\n");
       var logContent = $("#log-content");
-      
+
       // Hiển thị tổng số email cần gửi
       $("#email-counter").text(`Đã gửi: 0/${emails.length}`);
-    
+
       // Gửi email đa luồng với số luồng tối đa là 5 và cập nhật tiến độ
       sendEmailsInParallel(emails, logContent, 5).finally(() => {
-          $("#loading").hide();
-          $("#progress-container").hide(); // Ẩn thanh progress bar khi hoàn tất
-          $("#progress-text").hide(); // Ẩn text phần trăm khi hoàn tất
-          $("#email-counter").hide(); // Ẩn số lượng email khi hoàn tất
-          alert("Quá trình gửi email đã hoàn tất!");
+        $("#loading").hide();
+        $("#progress-container").hide(); // Ẩn thanh progress bar khi hoàn tất
+        $("#progress-text").hide(); // Ẩn text phần trăm khi hoàn tất
+        $("#email-counter").hide(); // Ẩn số lượng email khi hoàn tất
+        alert("Quá trình gửi email đã hoàn tất!");
       });
-  }).catch((error) => {
+    })
+    .catch((error) => {
       console.error("Lỗi khi xử lý proxy: ", error);
       $("#loading").hide();
       $("#progress-container").hide(); // Ẩn thanh progress bar nếu có lỗi
       $("#progress-text").hide(); // Ẩn text phần trăm nếu có lỗi
       $("#email-counter").hide(); // Ẩn số lượng email nếu có lỗi
-  });
+    });
 }
 
 function updateProgressBar(completedEmails, totalEmails) {
-    var progressPercentage = Math.round((completedEmails / totalEmails) * 100);
-    $("#progress-bar").css("width", progressPercentage + "%").text(progressPercentage + "%");
-    $("#progress-text").text(progressPercentage + "%");
-    
-    // Cập nhật số lượng email đã gửi được
-    $("#email-counter").text(`Đã gửi: ${completedEmails}/${totalEmails}`);
-}
+  var progressPercentage = Math.round((completedEmails / totalEmails) * 100);
+  $("#progress-bar")
+    .css("width", progressPercentage + "%")
+    .text(progressPercentage + "%");
+  $("#progress-text").text(progressPercentage + "%");
 
+  // Cập nhật số lượng email đã gửi được
+  $("#email-counter").text(`Đã gửi: ${completedEmails}/${totalEmails}`);
+}
 
 function sendEmailsInParallel(emails, logContent, maxParallel) {
   var totalEmails = emails.length;
@@ -221,45 +221,45 @@ function sendEmailsInParallel(emails, logContent, maxParallel) {
 
   // Cập nhật thanh tiến trình
   function updateProgressBar() {
-      completedEmails++;
-      var progressPercentage = Math.round((completedEmails / totalEmails) * 100);
-      $("#progress-bar").css("width", progressPercentage + "%");
-      $("#progress-text").text(progressPercentage + "%");
+    completedEmails++;
+    var progressPercentage = Math.round((completedEmails / totalEmails) * 100);
+    $("#progress-bar").css("width", progressPercentage + "%");
+    $("#progress-text").text(progressPercentage + "%");
   }
 
   // Hàm xử lý gửi email đa luồng
   return new Promise((resolve, reject) => {
-      let activePromises = 0;
-      let currentIndex = 0;
+    let activePromises = 0;
+    let currentIndex = 0;
 
-      function next() {
-          if (currentIndex >= totalEmails) {
-              if (activePromises === 0) {
-                  resolve(); // Hoàn tất khi tất cả các email đã được gửi
-              }
-              return;
-          }
-
-          while (activePromises < maxParallel && currentIndex < totalEmails) {
-              activePromises++;
-              let email = emails[currentIndex++];
-              
-              // Gọi hàm gửi email
-              check(email, currentIndex, logContent)
-                  .then(() => {
-                      updateProgressBar(); // Cập nhật tiến trình sau mỗi lần gửi email thành công hoặc thất bại
-                      activePromises--;
-                      next(); // Tiếp tục gửi email tiếp theo
-                  })
-                  .catch(() => {
-                      updateProgressBar();
-                      activePromises--;
-                      next(); // Tiếp tục gửi email tiếp theo dù có lỗi
-                  });
-          }
+    function next() {
+      if (currentIndex >= totalEmails) {
+        if (activePromises === 0) {
+          resolve(); // Hoàn tất khi tất cả các email đã được gửi
+        }
+        return;
       }
 
-      next(); // Bắt đầu gửi email
+      while (activePromises < maxParallel && currentIndex < totalEmails) {
+        activePromises++;
+        let email = emails[currentIndex++];
+
+        // Gọi hàm gửi email
+        check(email, currentIndex, logContent)
+          .then(() => {
+            updateProgressBar(); // Cập nhật tiến trình sau mỗi lần gửi email thành công hoặc thất bại
+            activePromises--;
+            next(); // Tiếp tục gửi email tiếp theo
+          })
+          .catch(() => {
+            updateProgressBar();
+            activePromises--;
+            next(); // Tiếp tục gửi email tiếp theo dù có lỗi
+          });
+      }
+    }
+
+    next(); // Bắt đầu gửi email
   });
 }
 
@@ -269,67 +269,108 @@ var successCount = 0;
 var failedCount = 0;
 
 function check(email, index, logContent) {
-    var emailInput = $("#email").val();
-    var senha = $("#senha").val();
-    var nome = $("#nome").val();
-    var port = $("#port").val();
-    var assunto = $("#assunto").val();
-    var conteudo = $("#conteudo").val();
+  var emailInput = $("#email").val();
+  var senha = $("#senha").val();
+  var nome = $("#nome").val();
+  var port = $("#port").val();
+  var assunto = $("#assunto").val();
+  var conteudo = $("#conteudo").val();
 
-    var proxy = getNextProxy();
+  var proxy = getNextProxy();
 
-    return new Promise((resolve, reject) => {
-        setTimeout(function() {
-            $.ajax({
-                type: "GET",
-                url: "app/api.php",
-                dataType: "json",
-                data: {
-                    send: "cc",
-                    ccs: email,
-                    email: emailInput,
-                    port: port,
-                    senha: senha,
-                    nome: nome,
-                    assunto: assunto,
-                    conteudo: conteudo,
-                    proxy: proxy
-                },
-                success: function(response) {
-                    if (response.status === "success") {
-                        logContent.append(response.message + "\n");
-                        successCount++;  // Tăng biến đếm thành công
-                    } else {
-                        logContent.append("Lỗi: " + response.message + "\n");
-                        failedCount++;  // Tăng biến đếm thất bại
-                    }
-
-                    // Cập nhật số lượng email gửi thành công và thất bại
-                    $("#success-total").text(successCount);
-                    $("#failed-total").text(failedCount);
-
-                    var ccsTextArea = $("#ccs");
-                    var currentCcs = ccsTextArea.val().split("\n");
-                    currentCcs = currentCcs.filter(line => line.trim() !== email);  // Loại bỏ dòng chứa email
-                    ccsTextArea.val(currentCcs.join("\n"));  // Cập nhật lại nội dung textarea ccs
-
-                    resolve();  // Tiếp tục với email tiếp theo
-                },
-                error: function(xhr, status, error) {
-                    logContent.append("Lỗi không xác định: " + error + "\n");
-                    failedCount++;  // Tăng biến đếm thất bại
-
-                    // Cập nhật số lượng email gửi thành công và thất bại
-                    $("#success-total").text(successCount);
-                    $("#failed-total").text(failedCount);
-
-                    resolve();  // Tiếp tục với email tiếp theo
-                }
+  return new Promise((resolve, reject) => {
+    setTimeout(function () {
+      $.ajax({
+        type: "GET",
+        url: "app/api.php",
+        dataType: "json",
+        data: {
+          send: "cc",
+          ccs: email,
+          email: emailInput,
+          port: port,
+          senha: senha,
+          nome: nome,
+          assunto: assunto,
+          conteudo: conteudo,
+          proxy: proxy,
+        },
+        success: function (response) {
+          // Chuyển response thành đối tượng nếu nó đang là chuỗi
+          let responseObject;
+          if (typeof response === "string") {
+            try {
+              responseObject = JSON.parse(response); // Chuyển chuỗi JSON thành đối tượng
+            } catch (e) {
+              logContent.append("Lỗi chuyển đổi JSON: " + e.message + "\n");
+              reject("Lỗi chuyển đổi JSON");
+              return;
+            }
+          } else {
+            responseObject = response; // Nếu đã là đối tượng, không cần chuyển đổi
+          }
+  
+          // Kiểm tra trạng thái và xử lý tương ứng
+          if (responseObject.status === "success") {
+            logContent.append(responseObject.message + "\n");
+            successCount++; // Tăng biến đếm thành công
+          } else if (responseObject.status === "quota_exceeded") {
+            Swal.fire({
+              icon: 'error',
+              title: 'Lỗi Quota',
+              text: 'Quota email đã vượt quá giới hạn!',
+            }).then(() => {
+              reject("Quota exceeded, stopping further requests.");
             });
-        }, index * 500);  // Giãn cách giữa các yêu cầu
-    });
+          } else if (responseObject.status === "smtp_error") {
+            Swal.fire({
+              icon: 'error',
+              title: 'Lỗi SMTP',
+              text: 'Không thể kết nối hoặc xác thực với máy chủ SMTP! \n Kiểm tra thông tin SMTP',
+            }).then(() => {
+              reject("SMTP connection failed, stopping further requests.");
+            });
+          } else if (responseObject.status === "recipient_error") {
+            Swal.fire({
+              icon: 'error',
+              title: 'Lỗi Email',
+              text: 'Địa chỉ email hoặc dữ liệu không hợp lệ!',
+            }).then(() => {
+              reject("Invalid recipient or data, stopping further requests.");
+            });
+          } else {
+            logContent.append("Lỗi: " + responseObject.message + "\n");
+            failedCount++; // Tăng biến đếm thất bại
+          }
+  
+          // Cập nhật số lượng email gửi thành công và thất bại
+          $("#success-total").text(successCount);
+          $("#failed-total").text(failedCount);
+  
+          // Loại bỏ email đã xử lý khỏi textarea ccs
+          var ccsTextArea = $("#ccs");
+          var currentCcs = ccsTextArea.val().split("\n");
+          currentCcs = currentCcs.filter((line) => line.trim() !== email); // Loại bỏ dòng chứa email
+          ccsTextArea.val(currentCcs.join("\n")); // Cập nhật lại nội dung textarea ccs
+  
+          resolve(); // Tiếp tục xử lý nếu không có lỗi
+        },
+        error: function (xhr, status, error) {
+          logContent.append("Lỗi không xác định: " + error + "\n");
+          failedCount++; // Tăng biến đếm thất bại
+  
+          // Cập nhật số lượng email gửi thành công và thất bại
+          $("#success-total").text(successCount);
+          $("#failed-total").text(failedCount);
+  
+          resolve(); // Tiếp tục với email tiếp theo
+        },
+      });
+    }, index * 50); // Giãn cách giữa các yêu cầu
+  });
+  
+  
 }
-
 
 function SelectAll(_0x6463xd) {
   document.getElementById(_0x6463xd).focus();

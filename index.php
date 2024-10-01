@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="styles/font-awesome.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 </head>
@@ -49,9 +50,9 @@
                 <center>
                     <div class="form-inline">
                         <input value="" type="text" maxlength="200" style="height: 35px; width: 200px; text-align: center;" class="form-control" name="email" id="email" placeholder="Email SMTP">
-                        <input value="" type="password" maxlength="30" style="height: 35px; width: 150px; text-align: center;" class="form-control" name="senha" id="senha" value="givgokpdpvrrrxaj" placeholder="givgokpdpvrrrxaj">
-                        <input value="" type="text" maxlength="30" style="height: 35px; width: 150px; text-align: center;" class="form-control" name="port" id="port" value="587" placeholder="587">
-                        <input value="" type="text" maxlength="200" style="height: 35px; width: 200px; text-align: center;" class="form-control" name="nome" id="nome" placeholder="Tên người gửi">
+                        <input value="" type="password" maxlength="30" style="height: 35px; width: 150px; text-align: center;" class="form-control" name="senha" id="senha" value="" placeholder="Password App">
+                        <input value="" type="text" maxlength="30" style="height: 35px; width: 150px; text-align: center;" class="form-control" name="port" id="port" value="587" placeholder="Nhập 587">
+                        <input value="" type="text" maxlength="200" style="height: 35px; width: 200px; text-align: center;" class="form-control" name="nome" id="nome" placeholder="Người gửi">
                         <input value="" type="text" maxlength="200" style="height: 35px; width: 150px; text-align: center;" class="form-control" name="assunto" id="assunto" placeholder="Tiêu đề">
                     </div>
                     <br>

@@ -52,28 +52,19 @@ if ($_GET['send'] == "cc") {
             // Kiểm tra các loại lỗi cụ thể và trả về thông báo tiếng Việt
             $errorMessage = $Mailer->ErrorInfo;
 
-            if (strpos($errorMessage, 'Invalid address') !== false) {
-                $response['status'] = "error";
-                $response['message'] = "Lỗi: Địa chỉ email không hợp lệ.";
-            } elseif (strpos($errorMessage, 'SMTP connect() failed') !== false) {
-                $response['status'] = "error";
-                $response['message'] = "Không thể kết nối tới máy chủ SMTP. Vui lòng kiểm tra thông tin kết nối";
-            } elseif (strpos($errorMessage, 'Failed to authenticate') !== false) {
-                $response['status'] = "error";
-                $response['message'] = "Lỗi: Xác thực thất bại. Kiểm tra lại tên người dùng và mật khẩu email.";
-            } elseif (strpos($errorMessage, 'Quota exceeded') !== false) {
+            if (strpos($errorMessage, 'Quota exceeded') !== false) {
                 $response['status'] = "quota_exceeded";
                 $response['message'] = "Lỗi: Quota email đã vượt quá giới hạn gửi.";
-            } elseif (strpos($errorMessage, 'Could not instantiate mail function') !== false) {
-                $response['status'] = "error";
-                $response['message'] = "Lỗi: Không thể khởi tạo chức năng gửi mail. Vui lòng kiểm tra cấu hình máy chủ.";
-            } elseif (strpos($errorMessage, 'SMTP Error: Data not accepted') !== false) {
-                $response['status'] = "error";
-                $response['message'] = "Lỗi: Máy chủ SMTP không chấp nhận dữ liệu.";
+            } elseif (strpos($errorMessage, 'SMTP connect() failed') !== false || strpos($errorMessage, 'Failed to authenticate') !== false) {
+                $response['status'] = "smtp_error";
+                $response['message'] = "Lỗi: Không thể kết nối hoặc xác thực với máy chủ SMTP. Kiểm tra lại cấu hình SMTP";
+            } elseif (strpos($errorMessage, 'Invalid address') !== false || strpos($errorMessage, 'SMTP Error: Data not accepted') !== false || strpos($errorMessage, 'Could not instantiate mail function') !== false) {
+                $response['status'] = "recipient_error";
+                $response['message'] = "Lỗi: Địa chỉ email hoặc dữ liệu không hợp lệ. Vui lòng kiểm tra lại email đích.";
             } else {
                 $response['status'] = "error";
                 $response['message'] = "Lỗi không xác định: " . $errorMessage;
-            }
+            }            
         }
     } catch (Exception $e) {
         $response['status'] = "exception";
