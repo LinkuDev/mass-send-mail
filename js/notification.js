@@ -191,7 +191,7 @@ function start() {
       return checkProxyList();
     })
     .then(() => {
-      var emails = ccs.split("\n");
+      var emails = ccs.split("\n").filter(email => email.trim() !== "");
       var logContent = $("#log-content");
 
       // Hiển thị tổng số email cần gửi
