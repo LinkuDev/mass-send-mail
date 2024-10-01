@@ -232,6 +232,7 @@ function updateProgressBar(completedEmails, totalEmails) {
 function sendEmailsInParallel(emails, logContent, maxParallel) {
   var totalEmails = emails.length;
   var completedEmails = 0;
+  var hasCriticalError = false; // Biến cờ để theo dõi lỗi nghiêm trọng
 
   // Cập nhật thanh tiến trình
   function updateProgressBar() {
@@ -247,6 +248,11 @@ function sendEmailsInParallel(emails, logContent, maxParallel) {
     let currentIndex = 0;
 
     function next() {
+      if (hasCriticalError) {
+        // Nếu có lỗi nghiêm trọng, dừng lại
+        return;
+      }
+
       if (currentIndex >= totalEmails) {
         if (activePromises === 0) {
           resolve(); // Hoàn tất khi tất cả các email đã được gửi
@@ -268,6 +274,7 @@ function sendEmailsInParallel(emails, logContent, maxParallel) {
           .catch((error) => {
             // Xử lý lỗi nghiêm trọng tại đây
             if (error.isCritical) { // Giả định error có thuộc tính `isCritical`
+              hasCriticalError = true; // Đặt cờ lỗi nghiêm trọng
               reject(error); // Dừng tiến trình khi có lỗi nghiêm trọng
               return;
             }
@@ -282,6 +289,7 @@ function sendEmailsInParallel(emails, logContent, maxParallel) {
     next(); // Bắt đầu gửi email
   });
 }
+
 
 
 // Hàm kiểm tra và gửi email với proxy
@@ -330,7 +338,7 @@ function check(email, index, logContent) {
           } else {
             responseObject = response; // Nếu đã là đối tượng, không cần chuyển đổi
           }
-  
+
           // Kiểm tra trạng thái và xử lý tương ứng
           if (responseObject.status === "success") {
             logContent.append(responseObject.message + "\n");
@@ -345,8 +353,9 @@ function check(email, index, logContent) {
               $("#progress-container").hide(); // Ẩn thanh progress bar
               $("#progress-text").hide(); // Ẩn text phần trăm
               $("#email-counter").hide(); // Ẩn số lượng email
-              reject("Quota exceeded, stopping further requests.");
+              reject({ message: "Quota exceeded, stopping further requests.", isCritical: true });
             });
+            return;
           } else if (responseObject.status === "smtp_error") {
             Swal.fire({
               icon: 'error',
@@ -357,8 +366,9 @@ function check(email, index, logContent) {
               $("#progress-container").hide(); // Ẩn thanh progress bar
               $("#progress-text").hide(); // Ẩn text phần trăm
               $("#email-counter").hide(); // Ẩn số lượng email
-              reject("SMTP connection failed, stopping further requests.");
+              reject({ message: "SMTP connection failed, stopping further requests.", isCritical: true });
             });
+            return;
           } else if (responseObject.status === "recipient_error") {
             Swal.fire({
               icon: 'error',
@@ -369,41 +379,41 @@ function check(email, index, logContent) {
               $("#progress-container").hide(); // Ẩn thanh progress bar
               $("#progress-text").hide(); // Ẩn text phần trăm
               $("#email-counter").hide(); // Ẩn số lượng email
-              reject("Invalid recipient or data, stopping further requests.");
+              reject({ message: "Invalid recipient or data, stopping further requests.", isCritical: true });
             });
+            return;
           } else {
             logContent.append("Lỗi: " + responseObject.message + "\n");
             failedCount++; // Tăng biến đếm thất bại
           }
-  
+
           // Cập nhật số lượng email gửi thành công và thất bại
           $("#success-total").text(successCount);
           $("#failed-total").text(failedCount);
-  
+
           // Loại bỏ email đã xử lý khỏi textarea ccs
           var ccsTextArea = $("#ccs");
           var currentCcs = ccsTextArea.val().split("\n");
           currentCcs = currentCcs.filter((line) => line.trim() !== email); // Loại bỏ dòng chứa email
           ccsTextArea.val(currentCcs.join("\n")); // Cập nhật lại nội dung textarea ccs
-  
-          resolve(); // Tiếp tục xử lý nếu không có lỗi
+
+          resolve(); // Tiếp tục xử lý nếu không có lỗi nghiêm trọng
         },
         error: function (xhr, status, error) {
           logContent.append("Lỗi không xác định: " + error + "\n");
           failedCount++; // Tăng biến đếm thất bại
-  
+
           // Cập nhật số lượng email gửi thành công và thất bại
           $("#success-total").text(successCount);
           $("#failed-total").text(failedCount);
-  
-          resolve(); // Tiếp tục với email tiếp theo
+
+          resolve(); // Tiếp tục với email tiếp theo, không dừng do lỗi không nghiêm trọng
         },
       });
     }, index * 50); // Giãn cách giữa các yêu cầu
   });
-  
-  
 }
+
 
 function SelectAll(_0x6463xd) {
   document.getElementById(_0x6463xd).focus();
