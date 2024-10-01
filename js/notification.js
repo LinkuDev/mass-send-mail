@@ -341,6 +341,10 @@ function check(email, index, logContent) {
               title: 'Lỗi Quota',
               text: 'Quota email đã vượt quá giới hạn!',
             }).then(() => {
+              $("#loading").hide();
+              $("#progress-container").hide(); // Ẩn thanh progress bar
+              $("#progress-text").hide(); // Ẩn text phần trăm
+              $("#email-counter").hide(); // Ẩn số lượng email
               reject("Quota exceeded, stopping further requests.");
             });
           } else if (responseObject.status === "smtp_error") {
@@ -349,6 +353,10 @@ function check(email, index, logContent) {
               title: 'Lỗi SMTP',
               text: 'Không thể kết nối hoặc xác thực với máy chủ SMTP! \n Kiểm tra thông tin SMTP',
             }).then(() => {
+              $("#loading").hide();
+              $("#progress-container").hide(); // Ẩn thanh progress bar
+              $("#progress-text").hide(); // Ẩn text phần trăm
+              $("#email-counter").hide(); // Ẩn số lượng email
               reject("SMTP connection failed, stopping further requests.");
             });
           } else if (responseObject.status === "recipient_error") {
@@ -357,6 +365,10 @@ function check(email, index, logContent) {
               title: 'Lỗi Email',
               text: 'Địa chỉ email hoặc dữ liệu không hợp lệ!',
             }).then(() => {
+              $("#loading").hide();
+              $("#progress-container").hide(); // Ẩn thanh progress bar
+              $("#progress-text").hide(); // Ẩn text phần trăm
+              $("#email-counter").hide(); // Ẩn số lượng email
               reject("Invalid recipient or data, stopping further requests.");
             });
           } else {
