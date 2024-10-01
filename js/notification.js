@@ -265,24 +265,27 @@ function sendEmailsInParallel(emails, logContent, maxParallel) {
         let email = emails[currentIndex++];
 
         // Gọi hàm gửi email
-        check(email, currentIndex, logContent)
-          .then(() => {
-            updateProgressBar(); // Cập nhật tiến trình sau mỗi lần gửi email thành công
-            activePromises--;
-            next(); // Tiếp tục gửi email tiếp theo
-          })
-          .catch((error) => {
-            // Xử lý lỗi nghiêm trọng tại đây
-            if (error.isCritical) { // Giả định error có thuộc tính `isCritical`
-              hasCriticalError = true; // Đặt cờ lỗi nghiêm trọng
-              reject(error); // Dừng tiến trình khi có lỗi nghiêm trọng
-              return;
-            }
-
-            updateProgressBar(); // Cập nhật tiến trình cho các lỗi không nghiêm trọng
-            activePromises--;
-            next(); // Tiếp tục gửi email tiếp theo dù có lỗi
-          });
+        setTimeout(() => {
+          // Gọi hàm gửi email
+          check(email, currentIndex, logContent)
+            .then(() => {
+              updateProgressBar(); // Cập nhật tiến trình sau mỗi lần gửi email thành công
+              activePromises--;
+              next(); // Tiếp tục gửi email tiếp theo
+            })
+            .catch((error) => {
+              // Xử lý lỗi nghiêm trọng tại đây
+              if (error.isCritical) {
+                hasCriticalError = true; // Đặt cờ lỗi nghiêm trọng
+                reject(error); // Dừng tiến trình khi có lỗi nghiêm trọng
+                return;
+              }
+    
+              updateProgressBar(); // Cập nhật tiến trình cho các lỗi không nghiêm trọng
+              activePromises--;
+              next(); // Tiếp tục gửi email tiếp theo dù có lỗi
+            });
+        }, 100); // Thêm độ trễ 100ms (hoặc bất kỳ giá trị nào bạn muốn)
       }
     }
 
