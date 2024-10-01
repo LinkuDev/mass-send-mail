@@ -160,41 +160,107 @@ function checkProxyList() {
 
 // Hàm bắt đầu gửi email
 function start() {
-  for(var instanceName in CKEDITOR.instances)
+  for (var instanceName in CKEDITOR.instances)
     CKEDITOR.instances[instanceName].updateElement();
-    var ccs = $("#ccs").val();
-    var content = $("#conteudo").val();
+  var ccs = $("#ccs").val();
+  var content = $("#conteudo").val();
 
-    if (ccs.length === 0) {
-        alert("Bạn cần phải tải một danh sách trước khi bắt đầu!");
-        return;
-    } else if (content === '') {
-        alert("Thêm nội dung!");
-        return;
-    } else {
-        console.log("Bắt đầu gửi email...");
-        $("#loading").show();
-    }
+  if (ccs.length === 0) {
+      alert("Bạn cần phải tải một danh sách trước khi bắt đầu!");
+      return;
+  } else if (content === '') {
+      alert("Thêm nội dung!");
+      return;
+  } else {
+      console.log("Bắt đầu gửi email...");
+      $("#loading").show();
+      $("#progress-container").show(); // Hiển thị thanh progress bar
+      $("#progress-text").show(); // Hiển thị text phần trăm
+      $("#email-counter").show(); // Hiển thị số lượng email đã gửi/ tổng số email
+  }
 
-    loadProxyList().then(() => {
-        return checkProxyList();
-    }).then(() => {
-        var emails = ccs.split("\n");
-        var logContent = $("#log-content");
+  loadProxyList().then(() => {
+    return checkProxyList();
+  }).then(() => {
+      var emails = ccs.split("\n");
+      var logContent = $("#log-content");
+      
+      // Hiển thị tổng số email cần gửi
+      $("#email-counter").text(`Đã gửi: 0/${emails.length}`);
+    
+      // Gửi email đa luồng với số luồng tối đa là 5 và cập nhật tiến độ
+      sendEmailsInParallel(emails, logContent, 5).finally(() => {
+          $("#loading").hide();
+          $("#progress-container").hide(); // Ẩn thanh progress bar khi hoàn tất
+          $("#progress-text").hide(); // Ẩn text phần trăm khi hoàn tất
+          $("#email-counter").hide(); // Ẩn số lượng email khi hoàn tất
+          alert("Quá trình gửi email đã hoàn tất!");
+      });
+  }).catch((error) => {
+      console.error("Lỗi khi xử lý proxy: ", error);
+      $("#loading").hide();
+      $("#progress-container").hide(); // Ẩn thanh progress bar nếu có lỗi
+      $("#progress-text").hide(); // Ẩn text phần trăm nếu có lỗi
+      $("#email-counter").hide(); // Ẩn số lượng email nếu có lỗi
+  });
+}
 
-        // Gửi email qua các proxy sống
-        emails.reduce((promise, email, index) => {
-            return promise.then(() => {
-                return check(email, index, logContent);
-            });
-        }, Promise.resolve()).finally(() => {
-            $("#loading").hide();
-            alert("Quá trình gửi email đã hoàn tất!");
-        });
-    }).catch((error) => {
-        console.error("Lỗi khi xử lý proxy: ", error);
-        $("#loading").hide();
-    });
+function updateProgressBar(completedEmails, totalEmails) {
+    var progressPercentage = Math.round((completedEmails / totalEmails) * 100);
+    $("#progress-bar").css("width", progressPercentage + "%").text(progressPercentage + "%");
+    $("#progress-text").text(progressPercentage + "%");
+    
+    // Cập nhật số lượng email đã gửi được
+    $("#email-counter").text(`Đã gửi: ${completedEmails}/${totalEmails}`);
+}
+
+
+function sendEmailsInParallel(emails, logContent, maxParallel) {
+  var totalEmails = emails.length;
+  var completedEmails = 0;
+
+  // Cập nhật thanh tiến trình
+  function updateProgressBar() {
+      completedEmails++;
+      var progressPercentage = Math.round((completedEmails / totalEmails) * 100);
+      $("#progress-bar").css("width", progressPercentage + "%");
+      $("#progress-text").text(progressPercentage + "%");
+  }
+
+  // Hàm xử lý gửi email đa luồng
+  return new Promise((resolve, reject) => {
+      let activePromises = 0;
+      let currentIndex = 0;
+
+      function next() {
+          if (currentIndex >= totalEmails) {
+              if (activePromises === 0) {
+                  resolve(); // Hoàn tất khi tất cả các email đã được gửi
+              }
+              return;
+          }
+
+          while (activePromises < maxParallel && currentIndex < totalEmails) {
+              activePromises++;
+              let email = emails[currentIndex++];
+              
+              // Gọi hàm gửi email
+              check(email, currentIndex, logContent)
+                  .then(() => {
+                      updateProgressBar(); // Cập nhật tiến trình sau mỗi lần gửi email thành công hoặc thất bại
+                      activePromises--;
+                      next(); // Tiếp tục gửi email tiếp theo
+                  })
+                  .catch(() => {
+                      updateProgressBar();
+                      activePromises--;
+                      next(); // Tiếp tục gửi email tiếp theo dù có lỗi
+                  });
+          }
+      }
+
+      next(); // Bắt đầu gửi email
+  });
 }
 
 // Hàm kiểm tra và gửi email với proxy
@@ -260,7 +326,7 @@ function check(email, index, logContent) {
                     resolve();  // Tiếp tục với email tiếp theo
                 }
             });
-        }, index * 2000);  // Giãn cách giữa các yêu cầu
+        }, index * 500);  // Giãn cách giữa các yêu cầu
     });
 }
 
