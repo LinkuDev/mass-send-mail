@@ -6,7 +6,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="js/custom.js"></script>
     <script src="js/notification.js"></script>
-    <!-- <script src="js/key.js"></script> -->
+    <script src="js/key.js"></script>
     <script src="app/ckeditor/ckeditor.js"></script>
     <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/43.1.1/ckeditor5.css" />
     <link href="styles/bootstrap.css" rel='stylesheet' type='text/css'>
