@@ -369,7 +369,7 @@ function check(email, index, logContent) {
               $("#progress-container").hide(); // Ẩn thanh progress bar
               $("#progress-text").hide(); // Ẩn text phần trăm
               $("#email-counter").hide(); // Ẩn số lượng email
-              reject({ message: "SMTP connection failed, stopping further requests.", isCritical: true });
+              reject({ message: responseObject.message , isCritical: true });
             });
             return;
           } else if (responseObject.status === "recipient_error") {
