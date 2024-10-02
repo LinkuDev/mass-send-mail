@@ -418,7 +418,7 @@ function check(email, index, logContent) {
           resolve(); // Tiếp tục với email tiếp theo, không dừng do lỗi không nghiêm trọng
         },
       });
-    }, index * 50); // Giãn cách giữa các yêu cầu
+    }, index * 1000); // Giãn cách giữa các yêu cầu
   });
 }
 
