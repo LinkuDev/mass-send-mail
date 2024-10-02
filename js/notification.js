@@ -232,8 +232,8 @@ function sendEmailsInParallel(emails, logContent) {
   var totalEmails = emails.length;
   var completedEmails = 0;
   var hasCriticalError = false;
-  var delayBetweenRequests = 1000; // Giới hạn 1 request mỗi giây (1000ms = 1 giây)
-  var maxRequestsPerMinute = 60;
+  var delayBetweenRequests = 1500; // Giới hạn 1 request mỗi giây (1000ms = 1 giây)
+  var maxRequestsPerMinute = 40;
   var activePromises = 0;
   var currentIndex = 0;
 
